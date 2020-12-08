@@ -4,7 +4,7 @@ import Head from "next/head";
 import UploadButton from "./_components/UploadButton";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getClientIp } from "request-ip";
-import {getFiles, uploadFile} from "./_firebase_config";
+import {getFiles, uploadFile} from "../_firebase_config";
 
 const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (props) => {
     const fileHandler = (files) => {
