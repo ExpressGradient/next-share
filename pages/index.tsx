@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import Header from "./_components/Header";
 import Head from "next/head";
 import UploadButton from "./_components/UploadButton";
@@ -14,7 +14,7 @@ const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
     }
 
     useEffect(() => {
-        getFiles(props.clientIp).then(response => response.items.forEach(item => console.log(item._delegate._location.path.split("/")[1])));
+        getFiles(props.clientIp).then(response => response.items.forEach(item => console.log(item["_delegate"]._location.path.split("/")[1])));
     }, []);
 
     return <main className={"bg-gradient-to-r from-purple-700 to-blue-300 bg-cover h-screen"}>
