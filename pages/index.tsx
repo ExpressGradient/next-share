@@ -1,37 +1,44 @@
-import React, {useEffect, useState} from "react";
+import React, {useState, useEffect} from "react";
 import Header from "../components/Header";
 import Head from "next/head";
 import UploadButton from "../components/UploadButton";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getClientIp } from "request-ip";
-import {getFiles, uploadFile} from "./firebase_config";
+import {uploadFile} from "./firebase_config";
 import FilesList from "../components/FilesList";
 import Modal from "../components/Modal";
 
 const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (props) => {
-    const [modalState, setModalState] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [modalMessage, setModalMessage] = useState({title: "", body: ""});
-    const [uploadFiles, setUploadFiles] = useState([]);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [inputFiles, setInputFiles] = useState([]);
 
     const fileHandler = (files) => {
-        setUploadFiles([]);
+        setInputFiles(files);
+        setUploadedFiles([]);
+
         for(let i=0; i < files.length; i++) {
             uploadFile(props.clientIp, files[i], (snapshot) => {
-                setUploadFiles((state) => state.concat(snapshot._delegate.metadata.name));
+                setUploadedFiles(state => [...state, snapshot._delegate.metadata.name]);
             });
         }
-        setModalMessage({title: `${uploadFiles.length} Files Uploaded`, body: uploadFiles.toString()});
-        if(uploadFiles.length === files.length) {
-            setModalState(true);
-        }
-        removeModal();
     }
 
-    const removeModal = () => setTimeout(() => setModalState(false), 1500);
+    useEffect(() => {
+        if(uploadedFiles.length === inputFiles.length && uploadedFiles.length !== 0) {
+            setModalMessage({title: `${uploadedFiles.length} File(s) Uploaded`, body: uploadedFiles.toString()});
+        }
+    }, [uploadedFiles]);
 
     useEffect(() => {
-        getFiles(props.clientIp).then(response => response.items.forEach(item => console.log(item["_delegate"]._location.path.split("/")[1])));
-    }, []);
+        if(modalMessage.title !== "" && modalMessage.body !== "") {
+            setShowModal(true);
+            removeModal();
+        }
+    }, [modalMessage]);
+
+    const removeModal = () => setTimeout(() => setShowModal(false), 2000);
 
     return <main className={"bg-gradient-to-r from-purple-700 to-blue-300 bg-cover h-screen"}>
         <Head>
@@ -44,7 +51,7 @@ const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
         <h1 className={"text-center text-red-800 text-2xl md:text-3xl my-4"}>Room <br/>{props.clientIp}</h1>
         <UploadButton fileHandler={fileHandler}>Upload Files</UploadButton>
         <FilesList />
-        {modalState && <Modal title={modalMessage.title} body={modalMessage.body} />}
+        {showModal && <Modal title={modalMessage.title} body={modalMessage.body} />}
     </main>
 }
 
