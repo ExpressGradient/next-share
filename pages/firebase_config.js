@@ -37,3 +37,7 @@ export const uploadFile = (folder, data, callback) => {
 export const getFiles = (folder) => {
     return storageRef.child(folder).listAll();
 }
+
+export default function GoBack() {
+    return <h1>PLEASE GO BACK</h1>
+}
