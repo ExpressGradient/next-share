@@ -1,16 +1,6 @@
 import firebase from "firebase/app";
 import "firebase/storage";
 
-// const firebaseConfig = {
-//     apiKey: "AIzaSyCOwneodkGJtcoPdjMt5JBKVxUSFmtGULs",
-//     authDomain: "next-share-e6f59.firebaseapp.com",
-//     projectId: "next-share-e6f59",
-//     storageBucket: "next-share-e6f59.appspot.com",
-//     messagingSenderId: "825294184085",
-//     appId: "1:825294184085:web:cf8d50e58b43c66b49059c",
-//     measurementId: "G-6R3Z063N13"
-// };
-
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
