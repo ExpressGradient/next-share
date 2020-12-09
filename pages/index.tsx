@@ -1,17 +1,33 @@
-import React, {useEffect} from "react";
-import Header from "./_components/Header";
+import React, {useEffect, useState} from "react";
+import Header from "../components/Header";
 import Head from "next/head";
-import UploadButton from "./_components/UploadButton";
+import UploadButton from "../components/UploadButton";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getClientIp } from "request-ip";
-import {getFiles, uploadFile} from "../_firebase_config";
+import {getFiles, uploadFile} from "./firebase_config";
+import FilesList from "../components/FilesList";
+import Modal from "../components/Modal";
 
 const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (props) => {
+    const [modalState, setModalState] = useState(false);
+    const [modalMessage, setModalMessage] = useState({title: "", body: ""});
+    const [uploadFiles, setUploadFiles] = useState([]);
+
     const fileHandler = (files) => {
+        setUploadFiles([]);
         for(let i=0; i < files.length; i++) {
-            uploadFile(props.clientIp, files[i], () => window.alert(`${files[i].name} uploaded!`))
+            uploadFile(props.clientIp, files[i], (snapshot) => {
+                setUploadFiles((state) => state.concat(snapshot._delegate.metadata.name));
+            });
         }
+        setModalMessage({title: `${uploadFiles.length} Files Uploaded`, body: uploadFiles.toString()});
+        if(uploadFiles.length === files.length) {
+            setModalState(true);
+        }
+        removeModal();
     }
+
+    const removeModal = () => setTimeout(() => setModalState(false), 1500);
 
     useEffect(() => {
         getFiles(props.clientIp).then(response => response.items.forEach(item => console.log(item["_delegate"]._location.path.split("/")[1])));
@@ -25,8 +41,10 @@ const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
         </Head>
 
         <Header title={"Next-Share"} subTitle={"Cloud-Local Network File Sharing"}/>
-        <h1 className={"text-center text-black text-2xl md:text-3xl my-4"}>Room <br/>{props.clientIp}</h1>
+        <h1 className={"text-center text-red-800 text-2xl md:text-3xl my-4"}>Room <br/>{props.clientIp}</h1>
         <UploadButton fileHandler={fileHandler}>Upload Files</UploadButton>
+        <FilesList />
+        {modalState && <Modal title={modalMessage.title} body={modalMessage.body} />}
     </main>
 }
 
