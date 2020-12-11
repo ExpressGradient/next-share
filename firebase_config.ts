@@ -17,17 +17,22 @@ try {
     firebase.app();
 }
 
-const storage = firebase.storage();
-let storageRef = storage.ref();
+const storage: firebase.storage.Storage = firebase.storage();
+let storageRef: firebase.storage.Reference = storage.ref();
 
-export const uploadFile = (folder, data, callback) => {
+export const uploadFile = (folder: string, data: File, callback) => {
     storageRef.child(folder).child(data.name).put(data).then(callback);
 }
 
-export const getFiles = (folder) => {
+export const getFiles = (folder: string) => {
     return storageRef.child(folder).listAll();
 }
 
-export default function GoBack() {
-    return <h1>PLEASE GO BACK</h1>
+export const downloadFile = async (folder: string, file: string) => {
+    const fileRef: firebase.storage.Reference = storageRef.child(folder).child(file);
+    return await fileRef.getDownloadURL();
+}
+
+export const deleteFile = (folder: string, file: string, callback: () => void) => {
+    storageRef.child(folder).child(file).delete().then(callback);
 }

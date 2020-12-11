@@ -4,7 +4,7 @@ import Head from "next/head";
 import UploadButton from "../components/UploadButton";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getClientIp } from "request-ip";
-import {uploadFile} from "./firebase_config";
+import {getFiles, uploadFile} from "../firebase_config";
 import FilesList from "../components/FilesList";
 import Modal from "../components/Modal";
 
@@ -13,6 +13,7 @@ const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
     const [modalMessage, setModalMessage] = useState({title: "", body: ""});
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [inputFiles, setInputFiles] = useState([]);
+    const [cloudFiles, setCloudFiles] = useState([]);
 
     const fileHandler = (files) => {
         setInputFiles(files);
@@ -40,6 +41,16 @@ const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
     const removeModal = () => setTimeout(() => setShowModal(false), 2000);
 
+    const getFileHandler = () => {
+        getFiles(props.clientIp).then(data => {
+            const fileNames = data.items.map(item => item.name);
+            setCloudFiles(fileNames);
+        });
+    }
+
+    useEffect(() => getFileHandler(), [uploadedFiles]);
+
+
     return <main className={"bg-gradient-to-r from-purple-700 to-blue-300 bg-cover h-screen"}>
         <Head>
             <title>Next-Share</title>
@@ -50,7 +61,7 @@ const Home: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
         <Header title={"Next-Share"} subTitle={"Cloud-Local Network File Sharing"}/>
         <h1 className={"text-center text-red-800 text-2xl md:text-3xl my-4"}>Room <br/>{props.clientIp}</h1>
         <UploadButton fileHandler={fileHandler}>Upload Files</UploadButton>
-        <FilesList />
+        <FilesList files={cloudFiles} folder={props.clientIp} callback={getFileHandler}/>
         {showModal && <Modal title={modalMessage.title} body={modalMessage.body} />}
     </main>
 }
